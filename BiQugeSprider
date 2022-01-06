@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+import scrapy
+from scrapy.selector import HtmlXPathSelector
+from tutorial.items import TutorialItem
+
+class BiqugeSpider(scrapy.Spider):
+    name = 'biquge'
+    allowed_domains = ['www.biquge.com.tv']
+    start_urls = ['http://www.biquge.com.tw/6_6078/']
+
+    def parse(self, response):
+        #filename = response.url.split("/")[-1]
+        #open(filename, 'wb').write(response.body)
+        hxs = HtmlXPathSelector(response)
+        sites = hxs.xpath('//dd/a')
+        items=[]
+        farUrl='http://www.biquge.com.tw';
+        for site in sites:
+            item=TutorialItem()
+            ##item['content']=site.xpath('@href').extract()
+            sonUrl=farUrl+''.join(site.xpath('@href').extract())
+            yield scrapy.Request(sonUrl, meta={'item':item}, callback=self.parse_2,dont_filter=True)
+            ##print(item)
+            items.append(item)
+        pass
+    def parse_2(self,response):
+        item = response.meta['item']
+        hxs = HtmlXPathSelector(response)
+        sites = hxs.xpath('//div[@id=content]')
+        for site in sites:
+            item['content']=site.xpath('text()').extract()
+            print('ÕÒµ½ÄÚÈÝ',''.join(site.xpath('text()').extract()))
+        '''sites = hxs.xpath('//h1')
+        for site in sites:
+            item['title']=site.xpath('text()').extract()'''
+        return item
+
+
+
+
+
+
+
+
+
+
+# -*- coding: utf-8 -*-
+import scrapy
+from scrapy.selector import HtmlXPathSelector
+from tutorial.items import TutorialItem
+
+class BiqugeSpider(scrapy.Spider):
+    name = 'biquge'
+    allowed_domains = ['www.biquge.com.tv']
+    start_urls = ['http://www.biquge.com.tw/6_6078/']
+
+    def parse(self, response):
+        hxs = HtmlXPathSelector(response)
+        sites = hxs.xpath('//dd/a')
+        farUrl='http://www.biquge.com.tw';
+        for site in sites:
+            sonUrl=farUrl+''.join(site.xpath('@href').extract())
+            yield scrapy.Request(sonUrl, callback=self.parse_2,dont_filter=True)
+        pass
+    def parse_2(self,response):
+        hxs = HtmlXPathSelector(response)
+        sites = hxs.xpath('//div[@id="content"]')
+        print('Content:',sites)
+        for site in sites:
+            print(''.join(site.xpath('text()').extract()))
+            #print('ÕÒµ½ÄÚÈÝ',''.join(site.xpath('text()').extract()))
+        return item
